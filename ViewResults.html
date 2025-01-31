@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩查看</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/Logo.png"></link>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>支持合并单元格的 Excel 表格展示</h1>
+    <table id="excel-table"></table>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // 获取 targetPath 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetPath = urlParams.get('targetPath');
+
+        if (!targetPath) {
+            alert('未找到 targetPath 参数，请检查 URL 是否正确！');
+        } else {
+            // 使用 Fetch 加载服务器上的 Excel 文件
+            fetch(targetPath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('无法加载文件，请检查路径是否正确或文件是否存在！');
+                    }
+                    return response.arrayBuffer(); // 读取文件为 ArrayBuffer
+                })
+                .then(data => {
+                    // 解析 Excel 文件
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0]; // 默认读取第一个工作表
+                    const sheet = workbook.Sheets[sheetName];
+
+                    // 获取合并单元格信息
+                    const merges = sheet['!merges'] || [];
+
+                    // 转换工作表为二维数组
+                    const jsonData = XLSX.utils.sheet_to_json(sheet, {
+                        header: 1,
+                        defval: "" // 空单元格的默认值
+                    });
+
+                    // 渲染表格
+                    renderTable(jsonData, merges);
+                })
+                .catch(error => {
+                    alert(`加载文件失败：${error.message}`);
+                });
+        }
+
+        function renderTable(data, merges) {
+            const table = document.getElementById('excel-table');
+            table.innerHTML = ''; // 清空表格内容
+
+            // 渲染表头（第一行）
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            data[0].forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header || '';
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // 渲染数据行（从第二行开始）
+            const tbody = document.createElement('tbody');
+            data.slice(1).forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, colIndex) => {
+                    const td = document.createElement('td');
+                    td.textContent = cell || '';
+
+                    // 检查当前单元格是否在合并区域
+                    const merge = merges.find(
+                        m =>
+                            m.s.r === rowIndex + 1 && // 起始行匹配（偏移 1 因为第一行是表头）
+                            m.s.c === colIndex // 起始列匹配
+                    );
+
+                    if (merge) {
+                        const rowSpan = merge.e.r - merge.s.r + 1; // 计算行合并数
+                        const colSpan = merge.e.c - merge.s.c + 1; // 计算列合并数
+                        td.rowSpan = rowSpan;
+                        td.colSpan = colSpan;
+                    }
+
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+        }
+    </script>
+</body>
+</html>

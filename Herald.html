@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>声明及作者</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/Logo.png"></link>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            background: #101820;
+            height: 100vh;
+        }
+
+        .container {
+            padding: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 30px;
+            border: 5px solid #fff;
+            cursor: pointer;
+        }
+
+        .logos a {
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .logos img {
+            width: 60px;
+            border-radius: 10px;
+        }
+
+        .declaration {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        /* 黑客风格的背景：数字矩阵 */
+        .matrix-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 0;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            color: #0f0;
+            font-size: 20px;
+            line-height: 25px;
+            opacity: 0.1;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <!-- 黑客风格的背景：矩阵动画 -->
+    <div class="matrix-background" id="matrix-background"></div>
+
+    <!-- 内容容器 -->
+    <div class="container">
+        <img class="avatar" id="avatar" src="images/Head.png" alt="作者头像" onclick="toggleAvatar()">
+        
+        <div class="logos">
+            <a href="https://github.com/Baugle" target="_blank"><img src="images/github3.png" alt="GitHub"></a>
+            <a href="https://www.javascript.com" target="_blank"><img src="images/javascript-map.png" alt="JavaScript"></a>
+            <a href="https://nodejs.org" target="_blank"><img src="images/nodejs.png" alt="Node.js"></a>
+            <a href="https://www.python.org" target="_blank"><img src="images/python.png" alt="Python"></a>
+            <a href="https://code.visualstudio.com" target="_blank"><img src="images/vscode.png" alt="VS Code"></a>
+            <a href="https://openai.com/chatgpt" target="_blank"><img src="images/Chat-GPT icon.png" alt="ChatGPT"></a>
+        </div>
+
+        <div class="declaration">
+            <h2>声明及作者</h2>
+            <p>数据来源商丘市第二高级中学，其他学校可透过GitHub下载并修改成绩数据后使用</p>
+            <p>此站点属开源作品，但仍需要作者购买服务器和域名，点击头像可微信捐款</p>
+            <p>请遵守GitHub开源协议，如侵权请透过GitHub联系作者删除</p>
+            <p>GitHub有更多C/C++/Python等多种语言的开源程序(GTA5 Menu基于BigBaseV1/V2，计算机极域软件破解，员工管理系统等)点击GitHub图标跳转主页</p>
+        </div>
+    </div>
+
+    <script>
+        // 切换头像图片
+        function toggleAvatar() {
+            const avatar = document.getElementById('avatar');
+            avatar.src = avatar.src.includes('Head.png') ? 'images/WeChatPay.png' : 'images/Head.png';
+        }
+
+        // 数字矩阵背景动画
+        const matrixBackground = document.getElementById('matrix-background');
+        const matrixChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@#$%^&*()_+=<>?';
+        
+        function generateMatrix() {
+            const cols = Math.floor(window.innerWidth / 20);
+            const rows = Math.floor(window.innerHeight / 25);
+            let matrix = '';
+            for (let i = 0; i < rows; i++) {
+                let row = '';
+                for (let j = 0; j < cols; j++) {
+                    row += matrixChars.charAt(Math.floor(Math.random() * matrixChars.length)) + ' ';
+                }
+                matrix += row + '\n';
+            }
+            matrixBackground.textContent = matrix;
+        }
+
+        generateMatrix();  // 初始化矩阵
+        setInterval(generateMatrix, 50);  // 每50ms更新一次矩阵内容
+        window.addEventListener('resize', generateMatrix);  // 窗口大小变化时重新绘制矩阵
+    </script>
+</body>
+</html>

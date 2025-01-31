@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>录入成绩</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #ff7e5f, #feb47b); /* 立体渐变背景 */
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            z-index: 10;
+            color: white;
+        }
+        .container h1 {
+            font-size: 35px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: fadeIn 1.5s ease-out;
+        }
+        .content {
+            color: #eee;
+            font-size: 20px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            animation: fadeIn 2s ease-out;
+        }
+
+        .button {
+            position: relative;
+            background-color: #ff7e5f;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: buttonMove 2s infinite ease-in-out;
+        }
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        .button:hover {
+            background-color: #feb47b;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.4);
+        }
+        .button:hover::before {
+            width: 0;
+            height: 0;
+        }
+        .button:active {
+            transform: translateY(3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes buttonMove {
+            0% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            100% { transform: translateX(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>管理员关闭了录入权限</h1>
+        <div class="content">
+            该站点数据由商丘市第二高级中学提供，是完整数据，无需再添加数据。如果遇到数据错误等特殊情况，请联系站点站长。
+            此站为开源仓库，所有人都可以配置相关数据，如果此学校学生数据非原仓库(此站点)数据，请不要在Github上发送Issues!请联系该站点站长！
+        </div>
+        <button class="button" onclick="window.location.href='https://github.com/Baugle';">点击查看GitHub</button>
+    </div>
+</body>
+</html>

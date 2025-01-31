@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iAnalyze</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/Logo.png"></link>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* 整个背景渐变动画 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #84fab0, #8fd3f4, #ffecd2, #fcb69f);
+            background-size: 300% 300%;
+            animation: gradient-animation 10s infinite linear;
+            z-index: -1; /* 放置于按钮后 */
+        }
+
+        /* 按钮样式 */
+        .button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5em;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            background: rgba(0, 0, 0, 0.3); /* 半透明背景，避免文字和背景融为一体 */
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        /* 鼠标悬停雾化效果 */
+        .button:hover {
+            background: rgba(0, 0, 0, 0.6);
+            transform: scale(1.05); /* 放大效果 */
+        }
+
+        /* 动态渐变动画 */
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <a href="AnalysisOfResults.html" class="button">成绩分析</a>
+    <a href="GradeEntry.html" class="button">成绩录入</a>
+    <a href="ViewResultsOptions.html" class="button">查看全班成绩</a>
+    <a href="Herald.html" class="button">声明及作者</a>
+</body>
+</html>

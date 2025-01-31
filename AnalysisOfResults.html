@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩查询系统</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { width: 80%; margin: auto; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .result-section { margin-top: 20px; }
+        .chart-container { display: flex; justify-content: space-around; margin-top: 30px; }
+        .chart-container canvas { max-width: 45%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>成绩查询系统</h2>
+        <label>学号: <input type="text" id="studentId"></label>
+        <label>分科:
+            <select id="subjectType">
+                <option value="物化生">物化生</option>
+                <option value="物化地">物化地</option>
+                <option value="政史地">政史地</option>
+            </select>
+        </label>
+        <label>学校:
+            <select id="school">
+                <option value="商丘二高">商丘二高</option>
+            </select>
+        </label>
+        <label>考试批次:
+            <select id="examBatch">
+                <option value="天一联考1">天一联考1</option>
+            </select>
+        </label>
+        <button id="queryButton">查询成绩</button>
+        
+        <div class="result-section">
+            <h3>查询结果</h3>
+            <p id="studentInfo"></p>  <!-- 姓名和班级展示 -->
+            <table id="scoreTable">
+                <thead>
+                    <tr>
+                        <th>科目</th><th>成绩</th><th>班级排名</th><th>学校排名</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="scoreChart1"></canvas>  <!-- 语文、数学、英语成绩柱形图 -->
+            <canvas id="scoreChart2"></canvas>  <!-- 物理、化学、地理成绩柱形图 -->
+            <canvas id="comparisonChart"></canvas>  <!-- 成绩对比图表 -->
+            <canvas id="radarChart"></canvas>  <!-- 蜘蛛网图表 -->
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            document.getElementById("queryButton").addEventListener("click", fetchScore);
+        };
+
+        function fetchScore() {
+            let studentId = document.getElementById('studentId').value;
+            let subjectType = document.getElementById('subjectType').value;
+            let school = document.getElementById('school').value;
+            let examBatch = document.getElementById('examBatch').value;
+
+            let filePath = `data/${school}/${examBatch}/${subjectType === '政史地' ? '历史总分' : '物理总分'}.xlsx`;
+
+            fetch(filePath)
+                .then(response => response.blob())
+                .then(blob => {
+                    let reader = new FileReader();
+                    reader.onload = function(event) {
+                        let data = new Uint8Array(event.target.result);
+                        let workbook = XLSX.read(data, { type: 'array' });
+                        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        let json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                        let studentRow = json.find(row => row[2] == studentId);
+                        if (!studentRow) {
+                            alert('未找到该学号的成绩');
+                            return;
+                        }
+
+                        let studentName = studentRow[3];  // 姓名
+                        let className = studentRow[1];   // 班级
+
+                        // 显示姓名和班级
+                        document.getElementById('studentInfo').innerText = `姓名: ${studentName} | 班级: ${className}`;
+
+                        let scores = {
+                            语文: { score: studentRow[7], classRank: studentRow[8], schoolRank: studentRow[9] },
+                            数学: { score: studentRow[13], classRank: studentRow[14], schoolRank: studentRow[15] },
+                            英语: { score: studentRow[16], classRank: studentRow[17], schoolRank: studentRow[18] }
+                        };
+
+                        if (subjectType !== '政史地') {
+                            scores.物理 = { score: studentRow[19], classRank: studentRow[20], schoolRank: studentRow[21] };
+                            scores.化学 = { score: studentRow[25], classRank: studentRow[26], schoolRank: studentRow[27] };
+                            if (subjectType === '物化生') {
+                                scores.生物 = { score: studentRow[31], classRank: studentRow[32], schoolRank: studentRow[33] };
+                            } else {
+                                scores.地理 = { score: studentRow[43], classRank: studentRow[44], schoolRank: studentRow[45] };
+                            }
+                        } else {
+                            scores.政治 = { score: studentRow[31], classRank: studentRow[32], schoolRank: studentRow[33] };
+                            scores.历史 = { score: studentRow[37], classRank: studentRow[38], schoolRank: studentRow[39] };
+                            scores.地理 = { score: studentRow[43], classRank: studentRow[44], schoolRank: studentRow[45] };
+                        }
+
+                        let tableBody = document.querySelector('#scoreTable tbody');
+                        tableBody.innerHTML = '';
+                        let labels1 = [], scoreData1 = [];
+                        let labels2 = [], scoreData2 = [];
+                        for (let subject in scores) {
+                            let row = `<tr><td>${subject}</td><td>${scores[subject].score}</td><td>${scores[subject].classRank}</td><td>${scores[subject].schoolRank}</td></tr>`;
+                            tableBody.innerHTML += row;
+                            if (subject === '语文' || subject === '数学' || subject === '英语') {
+                                labels1.push(subject);
+                                scoreData1.push(scores[subject].score);
+                            } else {
+                                labels2.push(subject);
+                                scoreData2.push(scores[subject].score);
+                            }
+                        }
+
+                        // 获取数据.xlsx文件中的平均分和总人数
+                        let dataFilePath = `data/${school}/${examBatch}/数据.xlsx`;
+                        fetch(dataFilePath)
+                            .then(response => response.blob())
+                            .then(blob => {
+                                let reader = new FileReader();
+                                reader.onload = function(event) {
+                                    let data = new Uint8Array(event.target.result);
+                                    let workbook = XLSX.read(data, { type: 'array' });
+                                    let sheet = workbook.Sheets[workbook.SheetNames[0]];
+                                    let jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                                  
+                                    // 获取各科的平均分
+                                    let avgScores = {
+                                        语文: jsonData[1][2],
+                                        数学: jsonData[1][3],
+                                        英语: jsonData[1][4],
+                                        物理: jsonData[1][5],
+                                        化学: jsonData[1][6],
+                                        生物: jsonData[1][7],
+                                        地理: jsonData[1][8],
+                                        历史: jsonData[1][9],
+                                        政治: jsonData[1][10]
+                                    };
+
+                                    // 生成成绩对比图表
+                                    renderComparisonChart(labels1, scoreData1, avgScores);
+                                    renderCharts1(labels1, scoreData1);
+                                    renderCharts2(labels2, scoreData2);
+                                    renderRadarChart(labels1.concat(labels2), scoreData1.concat(scoreData2), avgScores);
+                                };
+                                reader.readAsArrayBuffer(blob);
+                            })
+                            .catch(error => console.error('加载数据.xlsx失败:', error));
+                    };
+                    reader.readAsArrayBuffer(blob);
+                })
+                .catch(error => console.error('加载 Excel 失败:', error));
+        }
+
+        function renderCharts1(labels, scoreData) {
+            const ctxScore1 = document.getElementById('scoreChart1').getContext('2d');
+            new Chart(ctxScore1, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '语文、数学、英语成绩',
+                        data: scoreData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCharts2(labels, scoreData) {
+            const ctxScore2 = document.getElementById('scoreChart2').getContext('2d');
+            new Chart(ctxScore2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '物理、化学、地理成绩',
+                        data: scoreData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderComparisonChart(labels, scoreData, avgScores) {
+            const ctxComparison = document.getElementById('comparisonChart').getContext('2d');
+            new Chart(ctxComparison, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '学生成绩',
+                        data: scoreData,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false,
+                        tension: 0.1
+                    }, {
+                        label: '平均成绩',
+                        data: labels.map(subject => avgScores[subject]),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function renderRadarChart(labels, scoreData, avgScores) {
+            const ctxRadar = document.getElementById('radarChart').getContext('2d');
+            new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '学生成绩',
+                        data: scoreData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: '平均成绩',
+                        data: labels.map(subject => avgScores[subject]),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+</body>
+</html>

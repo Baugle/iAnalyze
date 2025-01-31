@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩查询</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/Logo.png"></link>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: rgba(249, 249, 249, 0.9);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h1 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group select, .form-group button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .form-group button {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #downloadBtn {
+            background-color: #28a745;
+        }
+
+        #downloadBtn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>成绩查询</h1>
+        <form id="queryForm" onsubmit="handleSearch(event)">
+            <div class="form-group">
+                <label for="school">学校选择：</label>
+                <select id="school" required>
+                    <option value="">请选择学校</option>
+                    <option value="商丘一高">商丘一高</option>
+                    <option value="商丘二高">商丘二高</option>
+                    <option value="商丘三高">商丘三高</option>
+                    <option value="商丘四高">商丘四高</option>
+                    <option value="商丘回高">商丘回高</option>
+                    <option value="商丘实验高中">商丘实验高中</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="batch">考试批次选择：</label>
+                <select id="batch" required>
+                    <option value="">请选择考试批次</option>
+                    <option value="天一联考1">天一联考1</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="class">班级选择：</label>
+                <select id="class" required>
+                    <option value="">请选择班级</option>
+                    <option value="1班">1班</option>
+<option value="2班">2班</option>
+<option value="3班">3班</option>
+<option value="4班">4班</option>
+<option value="5班">5班</option>
+<option value="6班">6班</option>
+<option value="7班">7班</option>
+<option value="8班">8班</option>
+<option value="9班">9班</option>
+<option value="10班">10班</option>
+<option value="11班">11班</option>
+<option value="12班">12班</option>
+<option value="13班">13班</option>
+<option value="14班">14班</option>
+<option value="15班">15班</option>
+<option value="16班">16班</option>
+<option value="17班">17班</option>
+<option value="18班">18班</option>
+<option value="19班">19班</option>
+<option value="20班">20班</option>
+<option value="21班">21班</option>
+<option value="22班">22班</option>
+<option value="23班">23班</option>
+<option value="24班">24班</option>
+<option value="25班">25班</option>
+<option value="26班">26班</option>
+<option value="27班">27班</option>
+<option value="28班">28班</option>
+<option value="29班">29班</option>
+<option value="30班">30班</option>
+<option value="31班">31班</option>
+<option value="32班">32班</option>
+<option value="33班">33班</option>
+<option value="34班">34班</option>
+<option value="35班">35班</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="project">项目选择：</label>
+                <select id="project" required>
+                    <option value="">请选择项目</option>
+                    <option value="学生成绩(方向名次)">学生成绩(方向名次)</option>
+                    <option value="各科前10名">各科前10名</option>
+                    <option value="各科试题分析">各科试题分析</option>
+                    <option value="各科小题分">各科小题分</option>
+                    <option value="各科综合指标">各科综合指标</option>
+                </select>
+            </div>
+            <div class="form-group button-group">
+                <button type="submit">查找</button>
+                <button type="button" id="downloadBtn" onclick="handleDownload()">下载</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function handleSearch(event) {
+            event.preventDefault();
+            const school = document.getElementById('school').value;
+            const batch = document.getElementById('batch').value;
+            const className = document.getElementById('class').value;
+            const projectName = document.getElementById('project').value;
+
+            if (school && batch && className && projectName) {
+                const targetPath = `data/${school}/${batch}/${className}/${className}_${projectName}.xlsx`;
+                window.location.href = `ViewResults.html?targetPath=${encodeURIComponent(targetPath)}`;
+            } else {
+                alert('请完整选择所有选项！');
+            }
+        }
+
+        async function handleDownload() {
+            event.preventDefault();
+            const school = document.getElementById('school').value;
+            const batch = document.getElementById('batch').value;
+            const className = document.getElementById('class').value;
+            const projectName = document.getElementById('project').value;
+
+            if (school && batch && className && projectName) {
+                const targetUrl = `data/${school}/${batch}/${className}/${className}_${projectName}.xlsx`;
+                window.location.href = targetUrl; 
+            } else {
+                alert('请完整选择所有选项！');
+            }
+        }
+    </script>
+</body>
+</html>
